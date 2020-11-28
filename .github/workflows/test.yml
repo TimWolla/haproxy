@@ -1,0 +1,50 @@
+# Copyright 2019 Ilya Shipitsin <chipitsine@gmail.com>
+# Copyright 2020 Tim Duesterhus <tim@bastelstu.be>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version
+# 2 of the License, or (at your option) any later version.
+
+name: VTest
+
+on:
+  push:
+
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    env:
+      # Configure a short TMPDIR to prevent failures due to long unix socket
+      # paths.
+      TMPDIR: /tmp
+      # Force ASAN output into asan.log to make the output more readable.
+      ASAN_OPTIONS: log_path=asan.log
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 100
+    - name: Install apt dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          liblua5.3-dev \
+          libpcre2-dev \
+          libsystemd-dev \
+          ninja-build \
+          socat
+    - name: Install VTest
+      run: |
+        curl -fsSL https://github.com/vtest/VTest/archive/master.tar.gz -o VTest.tar.gz
+        mkdir VTest
+        tar xvf VTest.tar.gz -C VTest --strip-components=1
+        make -C VTest -j$(nproc) FLAGS="-O2 -s -Wall"
+        sudo install -m755 VTest/vtest /usr/local/bin/vtest
+    - name: test
+      run: |
+        ls -alh
+        ls -alh .git/
+        git describe --tags --match 'v*' --abbrev=0 | cut -c 2-
+        VERSION=$([ -d .git/. ] && (git describe --tags --match 'v*' --abbrev=0 | cut -c 2-) 2>/dev/null)
+        git log --format=oneline --no-merges v${VERSION}.. 2>/dev/null | wc -l | tr -d '[:space:]'
+        git log -1 --pretty=%h --abbrev=6) 2>/dev/null
