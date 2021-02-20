@@ -30,6 +30,7 @@ jobs:
     name: ${{ matrix.name }}
     needs: generate-matrix
     runs-on: ${{ matrix.os }}
+    container: ${{ matrix.container }}
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
@@ -40,11 +41,8 @@ jobs:
       # Force ASAN output into asan.log to make the output more readable.
       ASAN_OPTIONS: log_path=asan.log
     steps:
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 100
     - name: Install apt dependencies
-      if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+      if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.container == '' }}
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -53,11 +51,30 @@ jobs:
           libsystemd-dev \
           ninja-build \
           socat
+    - name: Install dnf dependencies
+      if: ${{ startsWith(matrix.container, 'fedora') }}
+      run: |
+        sudo dnf install -y \
+          diffutils \
+          findutils \
+          gcc \
+          git \
+          lua-devel \
+          make \
+          openssl-devel \
+          pcre-devel \
+          socat \
+          systemd-devel \
+          which \
+          zlib-devel
     - name: Install brew dependencies
       if: ${{ startsWith(matrix.os, 'macos-') }}
       run: |
         brew install socat
         brew install lua
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 100
     - name: Install VTest
       run: |
         scripts/build-vtest.sh

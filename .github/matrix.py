@@ -134,6 +134,31 @@ for CC in ["gcc", "clang"]:
             }
         )
 
+# Fedora
+
+os = "ubuntu-latest"
+container = "fedora:rawhide"
+CC = "gcc"
+TARGET = "linux-glibc"
+matrix.append(
+    {
+        "name": "{}, {}, all features".format(container, CC),
+        "os": os,
+        "container": container,
+        "TARGET": TARGET,
+        "CC": CC,
+        "FLAGS": [
+            "USE_ZLIB=1",
+            "USE_PCRE=1",
+            "USE_PCRE_JIT=1",
+            "USE_LUA=1",
+            "USE_OPENSSL=1",
+            "USE_SYSTEMD=1",
+            "USE_PROMEX=1",
+        ],
+    }
+)
+
 # ASAN
 
 os = "ubuntu-latest"
