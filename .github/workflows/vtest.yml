@@ -29,8 +29,8 @@ jobs:
   Test:
     name: ${{ matrix.name }}
     needs: generate-matrix
-    runs-on: ${{ startsWith(matrix.os, 'fedora') && 'ubuntu-latest' || matrix.os }}
-    container: ${{ startsWith(matrix.os, 'fedora') && matrix.os || '' }}
+    runs-on: ${{ (startsWith(matrix.os, 'fedora') || startsWith(matrix.os, 'alpine')) && 'ubuntu-latest' || matrix.os }}
+    container: ${{ (startsWith(matrix.os, 'fedora') || startsWith(matrix.os, 'alpine')) && matrix.os || '' }}
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
@@ -67,6 +67,25 @@ jobs:
           systemd-devel \
           which \
           zlib-devel
+    - name: Install apk dependencies
+      if: ${{ startsWith(matrix.os, 'alpine') }}
+      run: |
+        apk add \
+          curl \
+          gcc \
+          git \
+          grep \
+          libc-dev \
+          linux-headers \
+          lua5.3-dev \
+          make \
+          openssl-dev \
+          pcre-dev \
+          pcre2-dev \
+          python3 \
+          socat \
+          sudo \
+          tar
     - name: Install brew dependencies
       if: ${{ startsWith(matrix.os, 'macos-') }}
       run: |

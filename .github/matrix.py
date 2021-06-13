@@ -157,6 +157,30 @@ matrix.append(
     }
 )
 
+# Alpine
+
+os = "alpine:latest"
+CC = "cc"
+TARGET = "linux-musl"
+matrix.append(
+    {
+        "name": "{}, {}, all features".format(os, CC),
+        "os": os,
+        "TARGET": TARGET,
+        "CC": CC,
+        "FLAGS": [
+            "USE_ZLIB=1",
+            "USE_PCRE=1",
+            "USE_PCRE_JIT=1",
+            "USE_LUA=1",
+            "LUA_INC=/usr/include/lua5.3",
+            "LUA_LIB=/usr/lib/lua5.3",
+            "USE_OPENSSL=1",
+            "USE_PROMEX=1",
+        ],
+    }
+)
+
 # ASAN
 
 os = "ubuntu-latest"
