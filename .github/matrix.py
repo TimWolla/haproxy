@@ -136,15 +136,13 @@ for CC in ["gcc", "clang"]:
 
 # Fedora
 
-os = "ubuntu-latest"
-container = "fedora:rawhide"
+os = "fedora:rawhide"
 CC = "gcc"
 TARGET = "linux-glibc"
 matrix.append(
     {
-        "name": "{}, {}, all features".format(container, CC),
+        "name": "{}, {}, all features".format(os, CC),
         "os": os,
-        "container": container,
         "TARGET": TARGET,
         "CC": CC,
         "FLAGS": [

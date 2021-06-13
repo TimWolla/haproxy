@@ -29,8 +29,8 @@ jobs:
   Test:
     name: ${{ matrix.name }}
     needs: generate-matrix
-    runs-on: ${{ matrix.os }}
-    container: ${{ matrix.container }}
+    runs-on: ${{ startsWith(matrix.os, 'fedora') && 'ubuntu-latest' || matrix.os }}
+    container: ${{ startsWith(matrix.os, 'fedora') && matrix.os || '' }}
     strategy:
       matrix: ${{ fromJson(needs.generate-matrix.outputs.matrix) }}
       fail-fast: false
@@ -42,7 +42,7 @@ jobs:
       ASAN_OPTIONS: log_path=asan.log
     steps:
     - name: Install apt dependencies
-      if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.container == '' }}
+      if: ${{ startsWith(matrix.os, 'ubuntu-') }}
       run: |
         sudo apt-get update
         sudo apt-get install -y \
@@ -52,7 +52,7 @@ jobs:
           ninja-build \
           socat
     - name: Install dnf dependencies
-      if: ${{ startsWith(matrix.container, 'fedora') }}
+      if: ${{ startsWith(matrix.os, 'fedora') }}
       run: |
         sudo dnf install -y \
           diffutils \
